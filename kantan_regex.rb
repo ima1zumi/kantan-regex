@@ -21,10 +21,27 @@ class KantanRegex::Parser
     @offset += 1
   end
 
+  # エントリーポイント
   def parse
     tree = parse_choise
 
+    # 最後までパースしたか確認
     raise 'End-of-string is expected' unless end?
     tree
+  end
+
+  # 選択 (a|b) をパースする
+  def parse_choice
+    children = []
+    children << parse_concat
+
+    while current_char == '|'
+      next_char
+      children << parse_concat
+    end
+
+    # childrenが1つの場合はChoiceを生成しない
+    return children.first if children.size == 1
+    KantanRegex::Choice[children]
   end
 end
